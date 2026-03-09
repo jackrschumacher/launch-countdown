@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rocket Launch Countdown</title>
+    <style>
+        /* Base Dark Theme Variables */
+        :root {
+            --bg-grad-top: #1a1f2e;
+            --bg-grad-bot: #0b0e14;
+            --panel-bg: #1a1f2e;
+            --text-main: #ffffff;
+            --text-muted: #8b95a5;
+            --accent: #00d2ff;
+            --border-color: #2a3142;
+            --info-bg: rgba(0, 0, 0, 0.2);
+            --select-bg: #0b0e14;
+        }
+
+        /* Light Theme Variables */
+        [data-theme="light"] {
+            --bg-grad-top: #f0f4f8;
+            --bg-grad-bot: #d9e2ec;
+            --panel-bg: #ffffff;
+            --text-main: #102a43;
+            --text-muted: #627d98;
+            --accent: #005A9C;
+            --border-color: #bcccdc;
+            --info-bg: rgba(240, 244, 248, 0.8);
+            --select-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background: radial-gradient(circle at top, var(--bg-grad-top) 0%, var(--bg-grad-bot) 100%);
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        .container {
+            background-color: var(--panel-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            box-sizing: border-box;
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+            position: relative;
+        }
+
+        .header-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(20px, 5vw, 26px);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-toggle {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .selector-group {
+            margin-bottom: 25px;
+        }
+
+        select {
+            width: 100%;
+            padding: 14px 16px; 
+            font-size: 16px;
+            background-color: var(--select-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.3s ease;
+            text-overflow: ellipsis;
+        }
+
+        select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.1);
+        }
+
+        .mission-info {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: var(--info-bg);
+            border-radius: 8px;
+            text-align: left;
+            transition: background-color 0.4s ease;
+        }
+
+        .mission-info p {
+            margin: 12px 0;
+            font-size: 15px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .mission-info span {
+            color: var(--text-main);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* FORCED ONE-LINE GRID */
+        .countdown {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Always 4 columns */
+            gap: 8px; /* Slightly smaller gap to fit small screens */
+        }
+
+        .time-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--select-bg);
+            padding: 12px 5px; /* Reduced side padding to ensure fit */
+            border-radius: 8px;
+            border-bottom: 3px solid var(--accent);
+            transition: background-color 0.4s ease;
+        }
+
+        .time-box .number {
+            font-size: clamp(16px, 5vw, 32px); /* Scales down slightly more for mobile */
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .time-box .label {
+            font-size: clamp(9px, 2.5vw, 11px);
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 8px;
+        }
+
+        .status-message {
+            display: none;
+            font-size: 24px;
+            color: var(--accent);
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 20px 0;
+        }
+
+        .loading {
+            color: var(--text-muted) !important;
+            font-style: italic;
+            font-weight: normal !important;
+        }
+
+        .attribution {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-muted);
+            transition: border-color 0.4s ease;
+        }
+
+        .attribution a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .attribution a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        /* Desktop Adjustments */
+        @media (min-width: 500px) {
+            .header-area {
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            .mission-info p {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .countdown {
+                gap: 12px; /* Restore larger gap on bigger screens */
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <div class="container">
+        
+        <div class="header-area">
+            <h1>🚀 Launch Countdown</h1>
+            <button id="themeToggle" class="theme-toggle">☀️ Light Mode</button>
+        </div>
+        
+        <div class="selector-group">
+            <select id="launchSelect">
+                <option value="">Establishing connection...</option>
+            </select>
+        </div>
+
+        <div class="mission-info">
+            <p>Mission: <span id="infoMission" class="loading">Awaiting data...</span></p>
+            <p>Rocket: <span id="infoRocket" class="loading">Awaiting data...</span></p>
+            <p>Agency: <span id="infoAgency" class="loading">Awaiting data...</span></p>
+            <p>Target Date: <span id="infoDate" class="loading">Awaiting data...</span></p>
+        </div>
+
+        <div id="countdownTimer" class="countdown" style="display: none;">
+            <div class="time-box">
+                <div class="number" id="days">00</div>
+                <div class="label">Days</div>
+            </div>
+            <div class="time-box">
+                <div class="number" id="hours">00</div>
+                <div class="label">Hours</div>
+            </div>
+            <div class="time-box">
+                <div class="number" id="minutes">00</div>
+                <div class="label">Mins</div>
+            </div>
+            <div class="time-box">
+                <div class="number" id="seconds">00</div>
+                <div class="label">Secs</div>
+            </div>
+        </div>
+
+        <div id="statusMessage" class="status-message">
+            LIFTOFF! 🚀
+        </div>
+
+        <div class="attribution">
+            Launch data provided by <a href="https://thespacedevs.com/" target="_blank" rel="noopener noreferrer">The Space Devs API</a>
+        </div>
+
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const currentTheme = localStorage.getItem('theme') || 'dark';
+        
+        document.body.setAttribute('data-theme', currentTheme);
+        updateToggleButton(currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            let theme = document.body.getAttribute('data-theme');
+            let newTheme = theme === 'dark' ? 'light' : 'dark';
+            
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateToggleButton(newTheme);
+        });
+
+        function updateToggleButton(theme) {
+            if (theme === 'light') {
+                themeToggle.innerHTML = '🌙 Dark Mode';
+            } else {
+                themeToggle.innerHTML = '☀️ Light Mode';
+            }
+        }
+
+        const selectEl = document.getElementById('launchSelect');
+        const infoMission = document.getElementById('infoMission');
+        const infoRocket = document.getElementById('infoRocket');
+        const infoAgency = document.getElementById('infoAgency');
+        const infoDate = document.getElementById('infoDate');
+        
+        const daysEl = document.getElementById('days');
+        const hoursEl = document.getElementById('hours');
+        const minsEl = document.getElementById('minutes');
+        const secsEl = document.getElementById('seconds');
+        
+        const timerContainer = document.getElementById('countdownTimer');
+        const statusMessage = document.getElementById('statusMessage');
+
+        let timerInterval;
+        let launches = [];
+
+        async function fetchUpcomingLaunches() {
+            const apiUrl = 'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=10';
+            
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
+                
+                const data = await response.json();
+                
+                launches = data.results.map((launch, index) => {
+                    return {
+                        id: index,
+                        mission: launch.mission ? launch.mission.name : launch.name.split(' |')[0],
+                        rocket: launch.rocket ? launch.rocket.configuration.name : 'Unknown Rocket',
+                        agency: launch.launch_service_provider ? launch.launch_service_provider.name : 'Unknown Agency',
+                        date: launch.net 
+                    };
+                });
+
+                populateSelect();
+
+            } catch (error) {
+                console.error('Error fetching launch data:', error);
+                selectEl.innerHTML = '<option value="">Error: Could not retrieve launch data</option>';
+                infoMission.textContent = 'Connection failed';
+                infoMission.classList.remove('loading');
+            }
+        }
+
+        function populateSelect() {
+            selectEl.innerHTML = ''; 
+
+            launches.forEach((launch, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                let displayName = launch.mission.length > 35 ? launch.mission.substring(0, 35) + '...' : launch.mission;
+                option.textContent = `${displayName}`;
+                selectEl.appendChild(option);
+            });
+
+            document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+
+            handleSelectionChange();
+            selectEl.addEventListener('change', handleSelectionChange);
+        }
+
+        function handleSelectionChange() {
+            const selectedIndex = selectEl.value;
+            const launch = launches[selectedIndex];
+
+            if (!launch) return;
+
+            infoMission.textContent = launch.mission;
+            infoRocket.textContent = launch.rocket;
+            infoAgency.textContent = launch.agency;
+            
+            const localDate = new Date(launch.date);
+            infoDate.textContent = localDate.toLocaleString();
+
+            clearInterval(timerInterval);
+            updateTimer(localDate); 
+            timerInterval = setInterval(() => updateTimer(localDate), 1000);
+        }
+
+        function updateTimer(targetDate) {
+            const now = new Date().getTime();
+            const distance = targetDate.getTime() - now;
+
+            if (distance < 0) {
+                clearInterval(timerInterval);
+                timerContainer.style.display = 'none';
+                statusMessage.style.display = 'block';
+                return;
+            } else {
+                timerContainer.style.display = 'grid'; 
+                statusMessage.style.display = 'none';
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            daysEl.textContent = days.toString().padStart(2, '0');
+            hoursEl.textContent = hours.toString().padStart(2, '0');
+            minsEl.textContent = minutes.toString().padStart(2, '0');
+            secsEl.textContent = seconds.toString().padStart(2, '0');
+        }
+
+        fetchUpcomingLaunches();
+    </script>
+</body>
+</html>
