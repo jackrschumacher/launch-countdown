@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rocket Launch Countdown</title>
+    <title>Live Rocket Launch Countdown</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-
     <style>
         /* Base Dark Theme Variables */
         :root {
@@ -132,7 +131,7 @@
 
         .mission-info p {
             margin: 12px 0;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--text-muted);
             display: flex;
             flex-direction: column;
@@ -142,14 +141,14 @@
         .mission-info span {
             color: var(--text-main);
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
         }
 
         /* FORCED ONE-LINE GRID */
         .countdown {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* Always 4 columns */
-            gap: 8px; /* Slightly smaller gap to fit small screens */
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 8px; 
         }
 
         .time-box {
@@ -158,14 +157,14 @@
             align-items: center;
             justify-content: center;
             background-color: var(--select-bg);
-            padding: 12px 5px; /* Reduced side padding to ensure fit */
+            padding: 12px 5px; 
             border-radius: 8px;
             border-bottom: 3px solid var(--accent);
             transition: background-color 0.4s ease;
         }
 
         .time-box .number {
-            font-size: clamp(16px, 5vw, 32px); /* Scales down slightly more for mobile */
+            font-size: clamp(16px, 5vw, 32px); 
             font-weight: bold;
             font-variant-numeric: tabular-nums;
             color: var(--text-main);
@@ -227,7 +226,7 @@
                 align-items: center;
             }
             .countdown {
-                gap: 12px; /* Restore larger gap on bigger screens */
+                gap: 12px; 
             }
         }
     </style>
@@ -237,7 +236,7 @@
     <div class="container">
         
         <div class="header-area">
-            <h1>🚀 Launch Countdown</h1>
+            <h1>🚀 Launch Control</h1>
             <button id="themeToggle" class="theme-toggle">☀️ Light Mode</button>
         </div>
         
@@ -251,6 +250,7 @@
             <p>Mission: <span id="infoMission" class="loading">Awaiting data...</span></p>
             <p>Rocket: <span id="infoRocket" class="loading">Awaiting data...</span></p>
             <p>Agency: <span id="infoAgency" class="loading">Awaiting data...</span></p>
+            <p>Location: <span id="infoLocation" class="loading">Awaiting data...</span></p>
             <p>Target Date: <span id="infoDate" class="loading">Awaiting data...</span></p>
         </div>
 
@@ -311,6 +311,7 @@
         const infoMission = document.getElementById('infoMission');
         const infoRocket = document.getElementById('infoRocket');
         const infoAgency = document.getElementById('infoAgency');
+        const infoLocation = document.getElementById('infoLocation'); // New variable
         const infoDate = document.getElementById('infoDate');
         
         const daysEl = document.getElementById('days');
@@ -339,6 +340,7 @@
                         mission: launch.mission ? launch.mission.name : launch.name.split(' |')[0],
                         rocket: launch.rocket ? launch.rocket.configuration.name : 'Unknown Rocket',
                         agency: launch.launch_service_provider ? launch.launch_service_provider.name : 'Unknown Agency',
+                        location: launch.pad && launch.pad.location ? launch.pad.location.name : 'Unknown Location', // Extract location
                         date: launch.net 
                     };
                 });
@@ -379,6 +381,7 @@
             infoMission.textContent = launch.mission;
             infoRocket.textContent = launch.rocket;
             infoAgency.textContent = launch.agency;
+            infoLocation.textContent = launch.location; // Update the UI with location
             
             const localDate = new Date(launch.date);
             infoDate.textContent = localDate.toLocaleString();
