@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Live Rocket Launch Countdown</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         /* Base Dark Theme Variables */
         :root {
@@ -17,6 +16,7 @@
             --border-color: #2a3142;
             --info-bg: rgba(0, 0, 0, 0.2);
             --select-bg: #0b0e14;
+            --status-green: lightgreen;
         }
 
         /* Light Theme Variables */
@@ -53,7 +53,7 @@
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             text-align: center;
-            max-width: 600px;
+            max-width: 700px; /* Slightly wider than mobile, but keeps the stacked list clean */
             width: 100%;
             border: 1px solid var(--border-color);
             box-sizing: border-box;
@@ -120,8 +120,14 @@
             box-shadow: 0 0 10px rgba(0, 210, 255, 0.1);
         }
 
+        .layout-split {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 25px;
+        }
+
         .mission-info {
-            margin-bottom: 30px;
             padding: 20px;
             background-color: var(--info-bg);
             border-radius: 8px;
@@ -130,7 +136,7 @@
         }
 
         .mission-info p {
-            margin: 12px 0;
+            margin: 10px 0;
             font-size: 14px;
             color: var(--text-muted);
             display: flex;
@@ -144,11 +150,29 @@
             font-size: 15px;
         }
 
-        /* FORCED ONE-LINE GRID */
+        .timer-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .status-message {
+            display: none;
+            font-size: 18px;
+            color: var(--status-green);
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
         .countdown {
             display: grid;
             grid-template-columns: repeat(4, 1fr); 
             gap: 8px; 
+            width: 100%;
         }
 
         .time-box {
@@ -164,7 +188,7 @@
         }
 
         .time-box .number {
-            font-size: clamp(16px, 5vw, 32px); 
+            font-size: clamp(16px, 4.5vw, 30px); 
             font-weight: bold;
             font-variant-numeric: tabular-nums;
             color: var(--text-main);
@@ -177,15 +201,6 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-top: 8px;
-        }
-
-        .status-message {
-            display: none;
-            font-size: 24px;
-            color: var(--accent);
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin: 20px 0;
         }
 
         .loading {
@@ -214,7 +229,9 @@
             text-decoration: underline;
         }
 
-        /* Desktop Adjustments */
+        /* --- MEDIA QUERIES --- */
+
+        /* Tablet Portrait Adjustments */
         @media (min-width: 500px) {
             .header-area {
                 flex-direction: row;
@@ -225,8 +242,73 @@
                 justify-content: space-between;
                 align-items: center;
             }
+            .mission-info span {
+                text-align: right;
+            }
             .countdown {
                 gap: 12px; 
+            }
+        }
+
+        /* Desktop Adjustments (Huge clock, stacked layout) */
+        @media (min-width: 800px) {
+            .container {
+                padding: 35px 45px; 
+            }
+            .time-box {
+                padding: 22px 10px; 
+            }
+            .time-box .number {
+                font-size: clamp(32px, 4vw, 54px); 
+            }
+            .time-box .label {
+                font-size: 14px;
+                margin-top: 12px;
+            }
+        }
+
+        /* Mobile Landscape Specific Adjustments (Side-by-side to save vertical space) */
+        @media (orientation: landscape) and (max-height: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px 30px;
+            }
+            .header-area, .selector-group {
+                margin-bottom: 15px;
+            }
+            .layout-split {
+                flex-direction: row; /* Flips to side-by-side */
+                gap: 20px;
+                align-items: stretch;
+            }
+            .timer-section {
+                flex: 1.2;
+            }
+            .mission-info {
+                flex: 1;
+                margin-bottom: 0; 
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            .mission-info p {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .mission-info span {
+                text-align: left;
+            }
+            .time-box {
+                padding: 15px 5px; 
+            }
+            .time-box .number {
+                font-size: clamp(20px, 4vw, 28px); 
+            }
+            .time-box .label {
+                font-size: 10px;
             }
         }
     </style>
@@ -246,44 +328,58 @@
             </select>
         </div>
 
-        <div class="mission-info">
-            <p>Mission: <span id="infoMission" class="loading">Awaiting data...</span></p>
-            <p>Rocket: <span id="infoRocket" class="loading">Awaiting data...</span></p>
-            <p>Agency: <span id="infoAgency" class="loading">Awaiting data...</span></p>
-            <p>Location: <span id="infoLocation" class="loading">Awaiting data...</span></p>
-            <p>Target Date: <span id="infoDate" class="loading">Awaiting data...</span></p>
-        </div>
+        <div class="layout-split">
+            
+            <div class="timer-section">
+                <div id="statusMessage" class="status-message">
+                    LAUNCHED
+                </div>
 
-        <div id="countdownTimer" class="countdown" style="display: none;">
-            <div class="time-box">
-                <div class="number" id="days">00</div>
-                <div class="label">Days</div>
+                <div id="countdownTimer" class="countdown" style="display: none;">
+                    <div class="time-box">
+                        <div class="number" id="days">00</div>
+                        <div class="label">Days</div>
+                    </div>
+                    <div class="time-box">
+                        <div class="number" id="hours">00</div>
+                        <div class="label">Hours</div>
+                    </div>
+                    <div class="time-box">
+                        <div class="number" id="minutes">00</div>
+                        <div class="label">Mins</div>
+                    </div>
+                    <div class="time-box">
+                        <div class="number" id="seconds">00</div>
+                        <div class="label">Secs</div>
+                    </div>
+                </div>
             </div>
-            <div class="time-box">
-                <div class="number" id="hours">00</div>
-                <div class="label">Hours</div>
-            </div>
-            <div class="time-box">
-                <div class="number" id="minutes">00</div>
-                <div class="label">Mins</div>
-            </div>
-            <div class="time-box">
-                <div class="number" id="seconds">00</div>
-                <div class="label">Secs</div>
-            </div>
-        </div>
 
-        <div id="statusMessage" class="status-message">
-            LIFTOFF! 🚀
+            <div class="mission-info">
+                <p>Mission: <span id="infoMission" class="loading">Awaiting data...</span></p>
+                <p>Target Date: <span id="infoDate" class="loading">Awaiting data...</span></p>
+                <p>Rocket: <span id="infoRocket" class="loading">Awaiting data...</span></p>
+                <p>Agency: <span id="infoAgency" class="loading">Awaiting data...</span></p>
+                <p>Location: <span id="infoLocation" class="loading">Awaiting data...</span></p>
+                <p>Status: <span id="infoStatus" class="loading">Awaiting data...</span></p>
+                
+            </div>
+
         </div>
 
         <div class="attribution">
-            Launch data provided by <a href="https://thespacedevs.com/" target="_blank" rel="noopener noreferrer">The Space Devs API</a>
+            Launch data provided by <a href="https://thespacedevs.com/" target="_blank" rel="noopener noreferrer">The Space Devs API.</a> Rate limit 15 requests/hour
+            <br>
+            <br>
+            View this project on <a href="https://github.com/jackrschumacher/launch-countdown" target="_blank" rel="noopener noreferrer">Github</a>
+            <br>
+            Partially created using Generative AI
         </div>
 
     </div>
 
     <script>
+        // --- Theme Logic ---
         const themeToggle = document.getElementById('themeToggle');
         const currentTheme = localStorage.getItem('theme') || 'dark';
         
@@ -307,11 +403,13 @@
             }
         }
 
+        // --- App Logic ---
         const selectEl = document.getElementById('launchSelect');
         const infoMission = document.getElementById('infoMission');
         const infoRocket = document.getElementById('infoRocket');
         const infoAgency = document.getElementById('infoAgency');
-        const infoLocation = document.getElementById('infoLocation'); // New variable
+        const infoLocation = document.getElementById('infoLocation'); 
+        const infoStatus = document.getElementById('infoStatus'); 
         const infoDate = document.getElementById('infoDate');
         
         const daysEl = document.getElementById('days');
@@ -326,7 +424,11 @@
         let launches = [];
 
         async function fetchUpcomingLaunches() {
-            const apiUrl = 'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=10';
+            const yesterday = new Date();
+            yesterday.setHours(yesterday.getHours() - 24);
+            const isoDate = yesterday.toISOString();
+            
+            const apiUrl = `https://ll.thespacedevs.com/2.2.0/launch/?limit=15&ordering=net&net__gte=${isoDate}`;
             
             try {
                 const response = await fetch(apiUrl);
@@ -334,13 +436,14 @@
                 
                 const data = await response.json();
                 
-                launches = data.results.map((launch, index) => {
+                launches = data.results.map(launch => {
                     return {
-                        id: index,
+                        id: launch.id, 
                         mission: launch.mission ? launch.mission.name : launch.name.split(' |')[0],
                         rocket: launch.rocket ? launch.rocket.configuration.name : 'Unknown Rocket',
                         agency: launch.launch_service_provider ? launch.launch_service_provider.name : 'Unknown Agency',
-                        location: launch.pad && launch.pad.location ? launch.pad.location.name : 'Unknown Location', // Extract location
+                        location: launch.pad && launch.pad.location ? launch.pad.location.name : 'Unknown Location',
+                        status: launch.status ? launch.status.name : 'Unknown Status',
                         date: launch.net 
                     };
                 });
@@ -358,30 +461,58 @@
         function populateSelect() {
             selectEl.innerHTML = ''; 
 
-            launches.forEach((launch, index) => {
+            launches.forEach(launch => {
                 const option = document.createElement('option');
-                option.value = index;
-                let displayName = launch.mission.length > 35 ? launch.mission.substring(0, 35) + '...' : launch.mission;
-                option.textContent = `${displayName}`;
+                option.value = launch.id; 
+                
+                const localDate = new Date(launch.date);
+                const dateTimeString = localDate.toLocaleString(undefined, { 
+                    month: 'numeric', 
+                    day: 'numeric', 
+                    hour: 'numeric', 
+                    minute: '2-digit' 
+                });
+                
+                let displayName = launch.mission.length > 20 ? launch.mission.substring(0, 20) + '...' : launch.mission;
+                option.textContent = `${displayName} (${dateTimeString})`;
                 selectEl.appendChild(option);
             });
 
             document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
+
+            const savedLaunchId = localStorage.getItem('selectedLaunchId');
+            let defaultLaunch = launches.find(l => l.id === savedLaunchId);
+
+            if (!defaultLaunch) {
+                const now = new Date().getTime();
+                defaultLaunch = launches.find(l => new Date(l.date).getTime() > now);
+            }
+
+            if (!defaultLaunch && launches.length > 0) {
+                defaultLaunch = launches[launches.length - 1];
+            }
+
+            if (defaultLaunch) {
+                selectEl.value = defaultLaunch.id;
+            }
 
             handleSelectionChange();
             selectEl.addEventListener('change', handleSelectionChange);
         }
 
         function handleSelectionChange() {
-            const selectedIndex = selectEl.value;
-            const launch = launches[selectedIndex];
+            const selectedId = selectEl.value;
+            const launch = launches.find(l => l.id === selectedId);
 
             if (!launch) return;
+
+            localStorage.setItem('selectedLaunchId', launch.id);
 
             infoMission.textContent = launch.mission;
             infoRocket.textContent = launch.rocket;
             infoAgency.textContent = launch.agency;
-            infoLocation.textContent = launch.location; // Update the UI with location
+            infoLocation.textContent = launch.location; 
+            infoStatus.textContent = launch.status; 
             
             const localDate = new Date(launch.date);
             infoDate.textContent = localDate.toLocaleString();
@@ -393,24 +524,25 @@
 
         function updateTimer(targetDate) {
             const now = new Date().getTime();
-            const distance = targetDate.getTime() - now;
+            let distance = targetDate.getTime() - now;
+            let isPast = false;
 
             if (distance < 0) {
-                clearInterval(timerInterval);
-                timerContainer.style.display = 'none';
-                statusMessage.style.display = 'block';
-                return;
+                isPast = true;
+                distance = Math.abs(distance);
+                statusMessage.style.display = 'block'; 
             } else {
-                timerContainer.style.display = 'grid'; 
-                statusMessage.style.display = 'none';
+                statusMessage.style.display = 'none'; 
             }
+
+            timerContainer.style.display = 'grid'; 
 
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            daysEl.textContent = days.toString().padStart(2, '0');
+            daysEl.textContent = (isPast ? "+" : "-") + days.toString().padStart(2, '0');
             hoursEl.textContent = hours.toString().padStart(2, '0');
             minsEl.textContent = minutes.toString().padStart(2, '0');
             secsEl.textContent = seconds.toString().padStart(2, '0');
