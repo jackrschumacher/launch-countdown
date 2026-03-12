@@ -136,18 +136,21 @@
         }
 
         .mission-info p {
-            margin: 10px 0;
+            margin: 12px 0;
             font-size: 14px;
             color: var(--text-muted);
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            flex-direction: row; /* Places label and details on opposite sides */
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
         }
 
         .mission-info span {
             color: var(--text-main);
             font-weight: bold;
             font-size: 15px;
+            text-align: right; /* Aligns the details text to the right */
         }
 
         .timer-section {
@@ -171,8 +174,8 @@
         /* --- TIMER CSS --- */
         .countdown {
             display: grid;
-            grid-template-columns: repeat(2, 1fr); /* 2x2 Grid by default for mobile portrait */
-            gap: 12px; 
+            grid-template-columns: 1fr; /* Single stacked column */
+            gap: 15px; 
             width: 100%;
         }
 
@@ -182,14 +185,14 @@
             align-items: center;
             justify-content: center;
             background-color: var(--select-bg);
-            padding: 16px 10px; 
+            padding: 24px 10px; 
             border-radius: 8px;
             border-bottom: 3px solid var(--accent);
             transition: background-color 0.4s ease;
         }
 
         .time-box .number {
-            font-size: clamp(28px, 8vw, 40px); 
+            font-size: clamp(48px, 15vw, 80px); /* Massive numbers */
             font-weight: bold;
             font-variant-numeric: tabular-nums;
             color: var(--text-main);
@@ -197,7 +200,7 @@
         }
 
         .time-box .label {
-            font-size: 12px;
+            font-size: 14px; 
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -234,57 +237,28 @@
 
         /* Tablet Portrait Adjustments */
         @media (min-width: 550px) {
-            .header-area {
-                flex-direction: row;
-                justify-content: space-between;
-            }
-            .mission-info p {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
-            .mission-info span {
-                text-align: right;
-            }
             .countdown {
-                grid-template-columns: repeat(4, 1fr); /* Switches back to 4-across */
+                grid-template-columns: repeat(4, 1fr); /* 4-across (Not 2-column) */
                 gap: 12px; 
+            }
+            .time-box {
+                padding: 16px 10px; 
+            }
+            .time-box .number {
+                font-size: clamp(32px, 6vw, 46px); 
             }
         }
 
-        /* Desktop Adjustments (Huge clock, side-by-side layout) */
+        /* Desktop Adjustments */
         @media (min-width: 800px) {
             .container {
                 padding: 35px 45px; 
-            }
-            .layout-split {
-                flex-direction: row; 
-                align-items: stretch;
-                gap: 30px;
-            }
-            .timer-section {
-                flex: 1.2;
-            }
-            .mission-info {
-                flex: 1;
-                margin-bottom: 0; 
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-            }
-            .mission-info p {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }
-            .mission-info span {
-                text-align: left;
             }
             .time-box {
                 padding: 22px 10px; 
             }
             .time-box .number {
-                font-size: clamp(32px, 4vw, 54px); 
+                font-size: clamp(40px, 4vw, 60px); 
             }
             .time-box .label {
                 font-size: 14px;
@@ -292,7 +266,7 @@
             }
         }
 
-        /* Mobile Landscape Specific Adjustments (Stacked, Full Width Clock) */
+        /* Mobile Landscape Specific Adjustments */
         @media (orientation: landscape) and (max-height: 600px) {
             body {
                 padding: 5px;
@@ -303,20 +277,15 @@
             .header-area, .selector-group {
                 margin-bottom: 10px;
             }
-            /* Explicitly ensuring it stays stacked (removes the old side-by-side logic) */
-            .layout-split {
-                flex-direction: column;
-                gap: 15px;
-            }
             .countdown {
-                grid-template-columns: repeat(4, 1fr); /* Keep it 4-across horizontally */
+                grid-template-columns: repeat(4, 1fr); /* 4-across horizontally */
                 gap: 10px;
             }
             .time-box {
-                padding: 25px 10px; /* Thicker padding to make the clock dominate the screen */
+                padding: 15px 10px; 
             }
             .time-box .number {
-                font-size: clamp(26px, 6vw, 42px); /* Scales up nice and big */
+                font-size: clamp(26px, 6vw, 42px); 
             }
             .time-box .label {
                 font-size: 11px;
@@ -373,7 +342,6 @@
                 <p>Agency: <span id="infoAgency" class="loading">Awaiting data...</span></p>
                 <p>Location: <span id="infoLocation" class="loading">Awaiting data...</span></p>
                 <p>Status: <span id="infoStatus" class="loading">Awaiting data...</span></p>
-                
             </div>
 
         </div>
