@@ -53,7 +53,7 @@
             border-radius: 16px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             text-align: center;
-            max-width: 700px; /* Slightly wider than mobile, but keeps the stacked list clean */
+            max-width: 700px;
             width: 100%;
             border: 1px solid var(--border-color);
             box-sizing: border-box;
@@ -168,10 +168,11 @@
             text-transform: uppercase;
         }
 
+        /* --- TIMER CSS --- */
         .countdown {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 8px; 
+            grid-template-columns: repeat(2, 1fr); /* 2x2 Grid by default for mobile portrait */
+            gap: 12px; 
             width: 100%;
         }
 
@@ -181,14 +182,14 @@
             align-items: center;
             justify-content: center;
             background-color: var(--select-bg);
-            padding: 12px 5px; 
+            padding: 16px 10px; 
             border-radius: 8px;
             border-bottom: 3px solid var(--accent);
             transition: background-color 0.4s ease;
         }
 
         .time-box .number {
-            font-size: clamp(16px, 4.5vw, 30px); 
+            font-size: clamp(28px, 8vw, 40px); 
             font-weight: bold;
             font-variant-numeric: tabular-nums;
             color: var(--text-main);
@@ -196,7 +197,7 @@
         }
 
         .time-box .label {
-            font-size: clamp(9px, 2.5vw, 11px);
+            font-size: 12px;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -232,7 +233,7 @@
         /* --- MEDIA QUERIES --- */
 
         /* Tablet Portrait Adjustments */
-        @media (min-width: 500px) {
+        @media (min-width: 550px) {
             .header-area {
                 flex-direction: row;
                 justify-content: space-between;
@@ -246,42 +247,20 @@
                 text-align: right;
             }
             .countdown {
+                grid-template-columns: repeat(4, 1fr); /* Switches back to 4-across */
                 gap: 12px; 
             }
         }
 
-        /* Desktop Adjustments (Huge clock, stacked layout) */
+        /* Desktop Adjustments (Huge clock, side-by-side layout) */
         @media (min-width: 800px) {
             .container {
                 padding: 35px 45px; 
             }
-            .time-box {
-                padding: 22px 10px; 
-            }
-            .time-box .number {
-                font-size: clamp(32px, 4vw, 54px); 
-            }
-            .time-box .label {
-                font-size: 14px;
-                margin-top: 12px;
-            }
-        }
-
-        /* Mobile Landscape Specific Adjustments (Side-by-side to save vertical space) */
-        @media (orientation: landscape) and (max-height: 600px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                padding: 20px 30px;
-            }
-            .header-area, .selector-group {
-                margin-bottom: 15px;
-            }
             .layout-split {
-                flex-direction: row; /* Flips to side-by-side */
-                gap: 20px;
+                flex-direction: row; 
                 align-items: stretch;
+                gap: 30px;
             }
             .timer-section {
                 flex: 1.2;
@@ -302,13 +281,45 @@
                 text-align: left;
             }
             .time-box {
-                padding: 15px 5px; 
+                padding: 22px 10px; 
             }
             .time-box .number {
-                font-size: clamp(20px, 4vw, 28px); 
+                font-size: clamp(32px, 4vw, 54px); 
             }
             .time-box .label {
-                font-size: 10px;
+                font-size: 14px;
+                margin-top: 12px;
+            }
+        }
+
+        /* Mobile Landscape Specific Adjustments (Stacked, Full Width Clock) */
+        @media (orientation: landscape) and (max-height: 600px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 15px 20px;
+            }
+            .header-area, .selector-group {
+                margin-bottom: 10px;
+            }
+            /* Explicitly ensuring it stays stacked (removes the old side-by-side logic) */
+            .layout-split {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .countdown {
+                grid-template-columns: repeat(4, 1fr); /* Keep it 4-across horizontally */
+                gap: 10px;
+            }
+            .time-box {
+                padding: 25px 10px; /* Thicker padding to make the clock dominate the screen */
+            }
+            .time-box .number {
+                font-size: clamp(26px, 6vw, 42px); /* Scales up nice and big */
+            }
+            .time-box .label {
+                font-size: 11px;
             }
         }
     </style>
