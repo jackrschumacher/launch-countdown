@@ -140,7 +140,7 @@
             font-size: 14px;
             color: var(--text-muted);
             display: flex;
-            flex-direction: row; /* Places label and details on opposite sides */
+            flex-direction: row; 
             justify-content: space-between;
             align-items: center;
             gap: 15px;
@@ -150,7 +150,7 @@
             color: var(--text-main);
             font-weight: bold;
             font-size: 15px;
-            text-align: right; /* Aligns the details text to the right */
+            text-align: right; 
         }
 
         .timer-section {
@@ -174,8 +174,8 @@
         /* --- TIMER CSS --- */
         .countdown {
             display: grid;
-            grid-template-columns: 1fr; /* Single stacked column */
-            gap: 15px; 
+            grid-template-columns: repeat(4, 1fr); /* Forces 4-across horizontally everywhere */
+            gap: 8px; /* Smaller gap for mobile screens */
             width: 100%;
         }
 
@@ -185,14 +185,14 @@
             align-items: center;
             justify-content: center;
             background-color: var(--select-bg);
-            padding: 24px 10px; 
+            padding: 15px 5px; /* Scaled down padding for mobile */
             border-radius: 8px;
             border-bottom: 3px solid var(--accent);
             transition: background-color 0.4s ease;
         }
 
         .time-box .number {
-            font-size: clamp(48px, 15vw, 80px); /* Massive numbers */
+            font-size: clamp(20px, 6vw, 36px); /* Scaled down numbers to fit 4 on mobile */
             font-weight: bold;
             font-variant-numeric: tabular-nums;
             color: var(--text-main);
@@ -200,11 +200,11 @@
         }
 
         .time-box .label {
-            font-size: 14px; 
+            font-size: clamp(9px, 2.5vw, 12px); /* Scaled down labels to fit */
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .loading {
@@ -238,14 +238,17 @@
         /* Tablet Portrait Adjustments */
         @media (min-width: 550px) {
             .countdown {
-                grid-template-columns: repeat(4, 1fr); /* 4-across (Not 2-column) */
-                gap: 12px; 
+                gap: 12px; /* Restore standard gap */
             }
             .time-box {
                 padding: 16px 10px; 
             }
             .time-box .number {
-                font-size: clamp(32px, 6vw, 46px); 
+                font-size: clamp(32px, 6vw, 46px); /* Scale numbers up for tablet */
+            }
+            .time-box .label {
+                font-size: 13px;
+                margin-top: 8px;
             }
         }
 
@@ -258,7 +261,7 @@
                 padding: 22px 10px; 
             }
             .time-box .number {
-                font-size: clamp(40px, 4vw, 60px); 
+                font-size: clamp(40px, 4vw, 60px); /* Massive numbers for desktop */
             }
             .time-box .label {
                 font-size: 14px;
@@ -278,7 +281,6 @@
                 margin-bottom: 10px;
             }
             .countdown {
-                grid-template-columns: repeat(4, 1fr); /* 4-across horizontally */
                 gap: 10px;
             }
             .time-box {
