@@ -534,6 +534,10 @@
             newUrl.searchParams.set('id', launch.id);
             window.history.replaceState({}, '', newUrl);
 
+            // --- NEW: Update Page Title ---
+            document.title = `${launch.mission} Countdown`;
+            // ------------------------------
+
             infoMission.textContent = launch.mission;
             infoRocket.textContent = launch.rocket;
             infoAgency.textContent = launch.agency;
