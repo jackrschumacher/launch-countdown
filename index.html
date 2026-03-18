@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Live Rocket Launch Countdown</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         /* Base Dark Theme Variables */
         :root {
@@ -404,6 +405,19 @@
         let timerInterval;
         let launches = [];
 
+        // Helper function to keep data formatting clean and reusable
+        function formatLaunchData(launch) {
+            return {
+                id: launch.id, 
+                mission: launch.mission ? launch.mission.name : launch.name.split(' |')[0],
+                rocket: launch.rocket ? launch.rocket.configuration.name : 'Unknown Rocket',
+                agency: launch.launch_service_provider ? launch.launch_service_provider.name : 'Unknown Agency',
+                location: launch.pad && launch.pad.location ? launch.pad.location.name : 'Unknown Location',
+                status: launch.status ? launch.status.name : 'Unknown Status',
+                date: launch.net 
+            };
+        }
+
         async function fetchUpcomingLaunches() {
             const yesterday = new Date();
             yesterday.setHours(yesterday.getHours() - 24);
@@ -417,17 +431,30 @@
                 
                 const data = await response.json();
                 
-                launches = data.results.map(launch => {
-                    return {
-                        id: launch.id, 
-                        mission: launch.mission ? launch.mission.name : launch.name.split(' |')[0],
-                        rocket: launch.rocket ? launch.rocket.configuration.name : 'Unknown Rocket',
-                        agency: launch.launch_service_provider ? launch.launch_service_provider.name : 'Unknown Agency',
-                        location: launch.pad && launch.pad.location ? launch.pad.location.name : 'Unknown Location',
-                        status: launch.status ? launch.status.name : 'Unknown Status',
-                        date: launch.net 
-                    };
-                });
+                // 1. Map the standard upcoming launches
+                launches = data.results.map(launch => formatLaunchData(launch));
+
+                // --- NEW: HISTORICAL LAUNCH FALLBACK ---
+                // 2. Check if there is a specific ID in the URL that isn't in our current list
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlLaunchId = urlParams.get('id');
+
+                if (urlLaunchId && !launches.find(l => l.id === urlLaunchId)) {
+                    try {
+                        // Fetch that specific launch directly
+                        const historicalResponse = await fetch(`https://ll.thespacedevs.com/2.2.0/launch/${urlLaunchId}/`);
+                        if (historicalResponse.ok) {
+                            const historicalData = await historicalResponse.json();
+                            
+                            // Add it to the very beginning of our launches array so it shows up in the dropdown
+                            launches.unshift(formatLaunchData(historicalData)); 
+                        }
+                    } catch (error) {
+                        console.warn('Could not fetch specific historical launch data:', error);
+                        // We silently fail here so the app just defaults to the normal upcoming behavior
+                    }
+                }
+                // ----------------------------------------
 
                 populateSelect();
 
@@ -455,20 +482,34 @@
                 });
                 
                 let displayName = launch.mission.length > 20 ? launch.mission.substring(0, 20) + '...' : launch.mission;
-                option.textContent = `${displayName} (${dateTimeString})`;
+                
+                // Add a visual indicator if it's a past launch
+                const now = new Date().getTime();
+                const isPast = localDate.getTime() < now;
+                const prefix = isPast ? "[PAST] " : "";
+                
+                option.textContent = `${prefix}${displayName} (${dateTimeString})`;
                 selectEl.appendChild(option);
             });
 
             document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading'));
 
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlLaunchId = urlParams.get('id');
             const savedLaunchId = localStorage.getItem('selectedLaunchId');
-            let defaultLaunch = launches.find(l => l.id === savedLaunchId);
 
+            let defaultLaunch;
+
+            if (urlLaunchId) {
+                defaultLaunch = launches.find(l => l.id === urlLaunchId);
+            }
+            if (!defaultLaunch && savedLaunchId) {
+                defaultLaunch = launches.find(l => l.id === savedLaunchId);
+            }
             if (!defaultLaunch) {
                 const now = new Date().getTime();
                 defaultLaunch = launches.find(l => new Date(l.date).getTime() > now);
             }
-
             if (!defaultLaunch && launches.length > 0) {
                 defaultLaunch = launches[launches.length - 1];
             }
@@ -488,6 +529,10 @@
             if (!launch) return;
 
             localStorage.setItem('selectedLaunchId', launch.id);
+
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.set('id', launch.id);
+            window.history.replaceState({}, '', newUrl);
 
             infoMission.textContent = launch.mission;
             infoRocket.textContent = launch.rocket;
