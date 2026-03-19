@@ -460,7 +460,7 @@
 
             } catch (error) {
                 console.error('Error fetching launch data:', error);
-                selectEl.innerHTML = '<option value="">Error: Could not retrieve launch data</option>';
+                selectEl.innerHTML = '<option value="">Error: Could not retrieve launch data. API limit may have been reached.</option>';
                 infoMission.textContent = 'Connection failed';
                 infoMission.classList.remove('loading');
             }
